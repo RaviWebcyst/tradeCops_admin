@@ -1,0 +1,109 @@
+<template>
+    <div class="page-wrapper" id="main-wrapper" data-theme="blue_theme" data-layout="vertical" data-sidebartype="full" data-sidebar-position="fixed" data-header-position="fixed" >
+    <sidebar />
+    <div class="body-wrapper">
+      <navbar  />
+
+      <div class="container-fluid">
+        <div class="card bg-light-info shadow-none position-relative overflow-hidden">
+            <div class="card-body px-4 py-3">
+              <div class="row align-items-center">
+                <div class="col-9">
+                  <h4 class="fw-semibold mb-8">Pending Kyc's</h4>
+                  <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                      <li class="breadcrumb-item">
+                        <router-link class="text-muted " :to="{name:'admin_home'}">Dashboard</router-link>
+                      </li>
+                      <li class="breadcrumb-item" aria-current="page">Pending Kyc's</li>
+                    </ol>
+                  </nav>
+                </div>
+                <div class="col-3">
+                  <div class="text-center mb-n5">
+                    <img :src="url+'admin/images/ChatBc.png'" alt="" class="img-fluid mb-n4">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="card w-100 position-relative overflow-hidden">
+            <div class="px-4 py-3 border-bottom">
+              <h5 class="card-title fw-semibold mb-0 lh-sm">Pending Kyc's</h5>
+            </div>
+            <div class="card-body p-4">
+              <div class="table-responsive rounded-2 mb-4">
+                <table class="table border text-nowrap customize-table mb-0 align-middle">
+                  <thead class="text-dark fs-4">
+                    <tr>
+                      <th><h6 class="fs-4 fw-semibold mb-0">#</h6></th>
+                      <th><h6 class="fs-4 fw-semibold mb-0">First Name</h6></th>
+                      <th><h6 class="fs-4 fw-semibold mb-0">Last Name</h6></th>
+                      <th><h6 class="fs-4 fw-semibold mb-0">Email</h6></th>
+                      <th><h6 class="fs-4 fw-semibold mb-0">Status</h6></th>
+                      <th><h6 class="fs-4 fw-semibold mb-0">Action</h6></th>
+                    </tr>
+                  </thead>
+                  <tbody v-if="users.length > 0">
+                    <tr v-for="(user,i) in users">
+                      <td>{{ i+1 }}</td>
+                      <td>{{ user.user.first_name }}</td>
+                      <td>{{ user.user.last_name }}</td>
+                      <td>{{ user.user.email }}</td>
+                      <td> <span class="badge  fw-semibold fs-2" :class="user.user.kyc_status == 'Pending'?'bg-light-warning text-warning':(user.user.kyc_status=='Completed'?'bg-light-success text-success':'bg-light-danger text-danger')">{{ user.user.kyc_status }}</span></td>
+                      <td><router-link :to="{name:'kyc_details',params:{'id':user.id}}" class="btn btn-light">View Details</router-link></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+    </div>
+
+  </div>
+  </div>
+  </template>
+  
+  <script>
+  import navbar from "./header.vue";
+  import sidebar from "./sidebar.vue";
+  
+  export default {
+    components:{
+      navbar,
+      sidebar
+    },
+    data(){
+      return {
+              url:process.env.MIX_APP_URL,
+              api_url:process.env.MIX_API_URL,
+              message:{
+                  error:false,
+                  success:false
+              },
+              users:[],
+          }
+    },
+    created(){
+      this.getUsers();
+    },
+
+    methods:{
+      getUsers(){
+        axios.get(this.api_url+'pending_kyc',{
+        headers:{
+           'Authorization': `Bearer ${localStorage.token}` 
+        }
+       }).then(res=>{
+        console.log(res);
+          this.users = res.data.kycs.data;
+        }).catch(err=>{
+          this.$toaster.error(err.response.data.message);
+          console.log(err);
+        });
+      }
+    }
+  }
+  </script>
